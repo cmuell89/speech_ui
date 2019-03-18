@@ -1,67 +1,34 @@
-# demo app for webhooks and python
-# this app demonstrates a simple stateful web app 
-# that can be controlled via webhooks
-#
-# this should be deployed at https://csci4849-demo.herokuapp.com
-#
-# it uses the following libraries:
-# flask for parsing web requests: http://flask.pocoo.org
-# redis for simple object storage: https://pypi.org/project/redis/
-#
-# this can be deployed for free using heroku. see example here:
-# https://github.com/datademofun/heroku-basic-flask
-#
-# we use a simple redis database because heroku apps can't reliably
-# retain their state. this uses the free heroku redis store
-# from https://elements.heroku.com/addons/heroku-redis
-#
-# about this app: this app tracks the status of three lights in a house
-# (kitchen, livingroom, bedroom). each can be turned on and off
-# and the status can be read. in the current version, this just updates
-# the database, but you should be able to connect this to real stuff
-# without much work
-#
 # a good tutorial for the overall process is here:
 # https://www.pragnakalp.com/dialogflow-fulfillment-webhook-tutorial/
 
 from flask import Flask, request, jsonify
 import os
 from pymongo import MongoClient
-import json
-
 
 app = Flask(__name__)
 
-
-# use local settings for connecting to the database
 # example from https://stackoverflow.com/questions/9383450/how-can-i-detect-herokus-environment
-USE_LOCAL = not 'ON_HEROKU' in os.environ
+USE_LOCAL = 'ON_HEROKU' not in os.environ
 
-# connect to the database and return the db handle
+
 def connectToDatabase():
     if USE_LOCAL:
         client = MongoClient('localhost', 27017)
-        db = client['test-database']
+        return client['speech_db']
     else:
         client = MongoClient(os.environ.get("MONGO_URL"))
-        db = redis.from_url()
-
-    # initialize if we need to
-    return db
-
-# intitialize the database. we only need to do this once
-# we set all the lights to off      
-# 
-# note here that we are just using the light name as database variable names
-# in a real app we would probably want to use some namespace prefix to keep
-# everything from getting jammed up
+        return client['speech_db']
 
 
 def initialize(db):
-    shoppingList = []
-    db.set("shoppingList", json.dumps(shoppingList))
-    db.set("freezerTemp", 0)
-    db.set("fridgeTemp", 40)
+    shopping_list = []
+    doc = {
+        "freezerTemp": 0,
+        "fridgeTemp": 40,
+        "shoppingList": shopping_list
+    }
+    db['refrigerator'].insert_one(doc)
+    print(db['refrigerator'].find_one())
 
 
 def valid_freezer_temp(temp):
@@ -79,43 +46,50 @@ def valid_fridge_temp(temp):
 
 
 def set_freezer_temp(db, temp):
-    db.set('freezerTemp', temp)
+    mongo_id = db['refrigerator'].find_one()['_id']
+    db['refrigerator'].find_one_and_update({"_id": mongo_id},
+                                           {"$set": {"freezerTemp": temp}})
 
 
 def get_freezer_temp(db):
-    return db.get("freezerTemp")
+    return db['refrigerator'].find_one()['freezerTemp']
 
 
 def set_fridge_temp(db, temp):
-    db.set('fridgeTemp', temp)
+    mongo_id = db['refrigerator'].find_one()['_id']
+    db['refrigerator'].find_one_and_update({"_id": mongo_id},
+                                           {"$set": {"fridgeTemp": temp}})
 
 
 def get_fridge_temp(db):
-    return db.get("fridgeTemp")
+    return db['refrigerator'].find_one()['fridgeTemp']
 
 
 def add_to_shopping_list(db, item):
-    print(str(db.get('shoppingList')))
-    print(type(db.get('shoppingList')))
-    shopping_list = json.loads(str(db.get('shoppingList')))
+    mongo_id = db['refrigerator'].find_one()['_id']
+    shopping_list = db['refrigerator'].find_one()['shoppingList']
     shopping_list.append(item)
-    db.set('shoppingList', json.dumps(shopping_list))
+    db['refrigerator'].find_one_and_update({"_id": mongo_id},
+                                           {"$set": {"shoppingList": shopping_list}})
 
 
 def remove_from_shopping_list(db, item):
-    shopping_list = json.loads(str(db.get('shoppingList')))
+    mongo_id = db['refrigerator'].find_one()['_id']
+    shopping_list = db['refrigerator'].find_one()['shoppingList']
     if item in shopping_list:
         shopping_list.remove(item)
-    db.set('shoppingList', json.dumps(shopping_list))
+    db['refrigerator'].find_one_and_update({"_id": mongo_id},
+                                           {"$set": {"shoppingList": shopping_list}})
 
 
 def get_shopping_list(db):
-    return json.loads(str(db.get('shoppingList')))
+    return db['refrigerator'].find_one()['shoppingList']
 
 
 def clear_shopping_list(db):
-    shoppingList = []
-    db.set("shoppingList", json.dumps(shoppingList))
+    mongo_id = db['refrigerator'].find_one()['_id']
+    db['refrigerator'].find_one_and_update({"_id": mongo_id},
+                                           {"$set": {"shoppingList": []}})
 
 # @app.route("/")
 # def root():
@@ -132,28 +106,64 @@ def clear_shopping_list(db):
 
 
 @app.route("/<component>/")
-def webFreezerTemp(light):
+def web_temp(component):
     db = connectToDatabase()
-    temp = getFreezerTemp(db)
-    return "The freezer is set to {} degrees Fahrenheit".format(temp)
+    if component == "freezer":
+        temp = get_freezer_temp(db)
+        return "The freezer is set to {} degrees Fahrenheit".format(temp)
+    elif component == "fridge":
+        temp = get_fridge_temp(db)
+        return "The fridge is set to {} degrees Fahrenheit".format(temp)
 
 
-@app.route("/<component>/<value>")
-def webSetTemp(light, value):
+@app.route("/<component>/<temp>")
+def web_set_temp(component, temp):
+    temp = int(temp)
     db = connectToDatabase()
-    setLight(db, light, value)
-    return "The " + light + " light is now " + value
+    if component == "freezer":
+        if not valid_freezer_temp(temp):
+            return "Invalid temperature for the freezer. It must be between -10 and 10"
+        temp = set_freezer_temp(db, temp)
+        return "The freezer is set to {} degrees Fahrenheit".format(temp)
+    elif component == "fridge":
+        if not valid_fridge_temp(temp):
+            return "You gave an invalid temperature for the fridge. It must be between 32 and 43"
+        temp = set_fridge_temp(db, temp)
+        return "The fridge is set to {} degrees Fahrenheit".format(temp)
 
 
-# for readability's sake, here we represent the status as HTML
-# below in the webhook section we represent it as a string
-# to improve understandability of the text
-# if textOnly is true, strip out the html
+@app.route("/shopping_list/")
+def web_shopping_list():
+    db = connectToDatabase()
+    return "Here is your shopping list: {}.".format(get_shopping_list(db))
+
+
+@app.route("/shopping_list/clear")
+def web_clear_shopping_list():
+    db = connectToDatabase()
+    clear_shopping_list(db)
+    return "Your shopping list has been cleared."
+
+
+@app.route("/shopping_list/<item>/add")
+def web_shopping_list_add(item):
+    db = connectToDatabase()
+    add_to_shopping_list(db, item)
+    return "The following item has been added to your shopping list: {}".format(
+            item)
+
+
+@app.route("/shopping_list/<item>/remove")
+def web_shopping_list_remove(item):
+    db = connectToDatabase()
+    remove_from_shopping_list(db, item)
+    return "The following item has been removed to your shopping list: {}".format(
+            item)
+
 
 @app.route("/help")
-def getHelp():
+def get_help():
 
-    # return status as a string (to work with dialogflow)
     helpString = ("Here's what I can do:"
                   "\tWhat is the temperature of the freezer?"
                   "\tSet the freezer temp to XX degrees"
@@ -168,86 +178,60 @@ def getHelp():
 
 
 @app.route("/reset")
-def webReset():
+def web_reset():
     db = connectToDatabase()
     initialize(db)
-    return "ok"
-
-
-# this is for debugging the webhook code
-# it just prints out the json of the last webhook request
-@app.route("/lastRequest")
-def lastRequest():
-    db = connectToDatabase()
-    req = db.get("lastRequest")
-    return req
+    return "reset"
 
 
 # create a route for webhook
 @app.route("/dialog", methods=["POST"])
 def handleDialog():
     data = request.get_json()
-    # save this request for debugging
-    db = connectToDatabase()
-    db.set("lastRequest", json.dumps(data))
     print(data)
     if data['queryResult']['intent']['displayName'] == "help":
         # Help Intent
-        response = getHelp()
+        response = get_help()
         print(response)
         return jsonify({'fulfillmentText': response})
     elif data['queryResult']['intent']['displayName'] == "set_fridge_temp":
         # Set Fridge Temp Intent
         temp = data['queryResult']['parameters']['fridge_temp']
-        if valid_fridge_temp(temp):
-            set_fridge_temp(db, temp)
-            response = "The refrigerator temperature was set to {} degrees Fahrenheit.".format(temp)
-        else:
-            response = "You gave an invalid temperature for the fridge. It must be between 32 and 43"
+        response = web_set_temp('fridge', temp)
         print(response)
         return jsonify({'fulfillmentText': response})
     elif data['queryResult']['intent']['displayName'] == "get_fridge_temp":
         # Get Fridge Temp Intent
-        temp = get_fridge_temp(db)
-        response = "The refrigerator temperature is {} degrees Fahrenheit.".format(temp)
+        response = web_temp('fridge')
         print(response)
         return jsonify({'fulfillmentText': response})
     elif data['queryResult']['intent']['displayName'] == "set_freezer_temp":
         # Set Freezer Temp Intent
         temp = data['queryResult']['parameters']['freezer_temp']
-        if valid_freezer_temp(temp):
-            set_fridge_temp(db, temp)
-            response = "The freezer temperature was set to {} degrees Fahrenheit.".format(temp)
-        else:
-            response = "You gave an invalid temperature for the fridge. It must be between -10 and 10"
+        response = web_set_temp('freezer', temp)
         print(response)
         return jsonify({'fulfillmentText': response})
     elif data['queryResult']['intent']['displayName'] == "get_freezer_temp":
         # Get Freezer Temp Intent
-        temp = get_freezer_temp(db)
-        response = "The freezer temperature is {} degrees Fahrenheit.".format(temp)
+        response = web_temp('freezer')
         print(response)
         return jsonify({'fulfillmentText': response})
     elif data['queryResult']['intent']['displayName'] == "get_shopping_list":
-        shopping_list = get_shopping_list(db)
-        response = "Here is your shopping list: {}.".format(shopping_list)
+        response = web_shopping_list()
         print(response)
         return jsonify({'fulfillmentText': response})
-    elif data['queryResult']['intent']['displayName'] == "get_shopping_list":
-        clear_shopping_list(db)
-        response = "Your shopping list has been cleared."
+    elif data['queryResult']['intent']['displayName'] == "clear_shopping_list":
+        response = web_clear_shopping_list()
         print(response)
         return jsonify({'fulfillmentText': response})
     elif data['queryResult']['intent']['displayName'] == "add_item_to_shopping_list":
         item = data['queryResult']['parameters']['shopping_item']
-        add_to_shopping_list(db, item)
-        response = "The following item has been added to your shopping list: {}".format(item)
+        response = web_shopping_list_add(item)
         print(response)
         return jsonify({'fulfillmentText': response})
     elif data['queryResult']['intent']['displayName'] == "remove_item_from_shopping_list":
         item = data['queryResult']['parameters']['shopping_item']
-        remove_from_shopping_list(db, item)
-        response = "The following item has been removed to your shopping list: {}".format(item)
+        response = web_shopping_list_remove(item)
         print(response)
         return jsonify({'fulfillmentText': response})
 
