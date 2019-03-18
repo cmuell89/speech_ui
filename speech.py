@@ -37,17 +37,14 @@ app = Flask(__name__)
 # example from https://stackoverflow.com/questions/9383450/how-can-i-detect-herokus-environment
 USE_LOCAL = not 'ON_HEROKU' in os.environ
 
-
-
 # connect to the database and return the db handle
 def connectToDatabase():
-  
     if USE_LOCAL:
         client = MongoClient('localhost', 27017)
         db = client['test-database']
     else:
-        client = MongoClient('localhost', 27017)
-        db = redis.from_url(os.environ.get("MONGO_URL"))
+        client = MongoClient(os.environ.get("MONGO_URL"))
+        db = redis.from_url()
 
     # initialize if we need to
     return db
