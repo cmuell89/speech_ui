@@ -1,17 +1,17 @@
 # a good tutorial for the overall process is here:
 # https://www.pragnakalp.com/dialogflow-fulfillment-webhook-tutorial/
 
-from flask import Flask, request, jsonify
+from flask import request, jsonify, Blueprint
 import os
 from pymongo import MongoClient
 
-app = Flask(__name__)
-
-# example from https://stackoverflow.com/questions/9383450/how-can-i-detect-herokus-environment
 USE_LOCAL = 'ON_HEROKU' not in os.environ
 
 
-def connectToDatabase():
+webhook = Blueprint('webhook', __name__)
+
+
+def connect_to_database():
     if USE_LOCAL:
         client = MongoClient('localhost', 27017)
         return client['speech_db']
@@ -28,7 +28,6 @@ def initialize(db):
         "shoppingList": shopping_list
     }
     db['refrigerator'].insert_one(doc)
-    print(db['refrigerator'].find_one())
 
 
 def valid_freezer_temp(temp):
@@ -91,23 +90,10 @@ def clear_shopping_list(db):
     db['refrigerator'].find_one_and_update({"_id": mongo_id},
                                            {"$set": {"shoppingList": []}})
 
-# @app.route("/")
-# def root():
-#     return """
-#     <h1>Commands:</h1>
-#     <ul>
-#         <li>/status - report the status of each light</li>
-#         <li>/get/{light} - return the light status</li>
-#         <li>/set/{light} - set the light status to on or off</li>
-#         <li>/reset - reset the database</li>
-#         <li>/lastRequest - see JSON of the last webhook request (for debugging)</li>
-#     </ul>
-#     """
 
-
-@app.route("/<component>/")
+@webhook.route("/webhook/<component>/")
 def web_temp(component):
-    db = connectToDatabase()
+    db = connect_to_database()
     if component == "freezer":
         temp = get_freezer_temp(db)
         return "The freezer is set to {} degrees Fahrenheit".format(temp)
@@ -116,52 +102,53 @@ def web_temp(component):
         return "The fridge is set to {} degrees Fahrenheit".format(temp)
 
 
-@app.route("/<component>/<temp>")
+@webhook.route("/webhook/<component>/<temp>")
 def web_set_temp(component, temp):
     temp = int(temp)
-    db = connectToDatabase()
+    print(temp)
+    db = connect_to_database()
     if component == "freezer":
         if not valid_freezer_temp(temp):
             return "Invalid temperature for the freezer. It must be between -10 and 10"
-        temp = set_freezer_temp(db, temp)
-        return "The freezer is set to {} degrees Fahrenheit".format(temp)
+        set_freezer_temp(db, temp)
+        return "The freezer has been set to {} degrees Fahrenheit".format(temp)
     elif component == "fridge":
         if not valid_fridge_temp(temp):
             return "You gave an invalid temperature for the fridge. It must be between 32 and 43"
-        temp = set_fridge_temp(db, temp)
-        return "The fridge is set to {} degrees Fahrenheit".format(temp)
+        set_fridge_temp(db, temp)
+        return "The fridge has been set to {} degrees Fahrenheit".format(temp)
 
 
-@app.route("/shopping_list/")
+@webhook.route("/webhook/shopping_list/")
 def web_shopping_list():
-    db = connectToDatabase()
+    db = connect_to_database()
     return "Here is your shopping list: {}.".format(get_shopping_list(db))
 
 
-@app.route("/shopping_list/clear")
+@webhook.route("/webhook/shopping_list/clear")
 def web_clear_shopping_list():
-    db = connectToDatabase()
+    db = connect_to_database()
     clear_shopping_list(db)
     return "Your shopping list has been cleared."
 
 
-@app.route("/shopping_list/<item>/add")
+@webhook.route("/webhook/shopping_list/<item>/add")
 def web_shopping_list_add(item):
-    db = connectToDatabase()
+    db = connect_to_database()
     add_to_shopping_list(db, item)
     return "The following item has been added to your shopping list: {}".format(
             item)
 
 
-@app.route("/shopping_list/<item>/remove")
+@webhook.route("/webhook/shopping_list/<item>/remove")
 def web_shopping_list_remove(item):
-    db = connectToDatabase()
+    db = connect_to_database()
     remove_from_shopping_list(db, item)
     return "The following item has been removed to your shopping list: {}".format(
             item)
 
 
-@app.route("/help")
+@webhook.route("/webhook/help")
 def get_help():
 
     helpString = ("Here's what I can do:"
@@ -177,18 +164,10 @@ def get_help():
     return helpString
 
 
-@app.route("/reset")
-def web_reset():
-    db = connectToDatabase()
-    initialize(db)
-    return "reset"
-
-
 # create a route for webhook
-@app.route("/dialog", methods=["POST"])
+@webhook.route("/webhook", methods=["POST"])
 def handleDialog():
     data = request.get_json()
-    print(data)
     if data['queryResult']['intent']['displayName'] == "help":
         # Help Intent
         response = get_help()
@@ -234,10 +213,3 @@ def handleDialog():
         response = web_shopping_list_remove(item)
         print(response)
         return jsonify({'fulfillmentText': response})
-
-
-# run the app
-if __name__ == '__main__':
-    db = connectToDatabase()
-    initialize(db)
-    app.run()
