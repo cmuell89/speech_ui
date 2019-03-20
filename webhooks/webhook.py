@@ -16,7 +16,7 @@ def connect_to_database():
         client = MongoClient('localhost', 27017)
         return client['speech_db']
     else:
-        client = MongoClient(os.environ.get("MONGO_URL"))
+        client = MongoClient(os.environ.get("MONGODB_URI"))
         return client['speech_db']
 
 
@@ -137,7 +137,7 @@ def web_shopping_list_add(item):
     db = connect_to_database()
     add_to_shopping_list(db, item)
     return "The following item has been added to your shopping list: {}".format(
-            item)
+        item)
 
 
 @webhook.route("/webhook/shopping_list/<item>/remove")
@@ -145,7 +145,7 @@ def web_shopping_list_remove(item):
     db = connect_to_database()
     remove_from_shopping_list(db, item)
     return "The following item has been removed to your shopping list: {}".format(
-            item)
+        item)
 
 
 @webhook.route("/webhook/help")
