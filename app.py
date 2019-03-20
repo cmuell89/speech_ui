@@ -14,6 +14,11 @@ def home():
     return render_template('home.html')
 
 
+@app.route('/about', methods=['GET', 'POST'])
+def about():
+    return render_template('about.html')
+
+
 # run the app
 if __name__ == '__main__':
     db = connect_to_database()

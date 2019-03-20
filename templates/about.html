@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}About{% endblock title %}
+{% block jumbotron %}
+    <div class="jumbotron jumbotron-fluid">
+        <div class="container">
+            <h1 class="display-4">Project 1: UI Programming</h1>
+            <p class="lead">You might be asking, "How do I use this website?"</p>
+        </div>
+    </div>
+{% endblock jumbotron %}
+{% block content %}  
+       <div class="containter" id="bigMama">
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Demonstration Constraints</h5>
+                        <h5 class="card-title">You can either click/tap or use your microphone and say:</h5>
+                        <p class="card-text">"Upright On" or "Upright Off"</p>
+                        <p class="card-text">"Height On" or "Height Off"</p>
+                        <p class="card-text">"Perimeter On" or "Perimeter Off"</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Trigger Events</h5>
+                        <h5 class="card-title">You can either click/tap or use your microphone and say:</h5>
+                        <p class="card-text">"Segment"</p>
+                        <p class="card-text">"Pour"</p>
+                        <p class="card-text">"Pick and Place"</p>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

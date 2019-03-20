@@ -1,0 +1,28 @@
+{
+  "name": "speech_ui",
+  "version": "1.0.0",
+  "description": "Speech UI for Project 2 CSCI5849",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack -p --progress --config webpack.config.js",
+    "dev-build": "webpack --progress -d --config webpack.config.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "webpack --progress -d --config webpack.config.js --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cmuell89/speech_ui.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cmuell89/speech_ui/issues"
+  },
+  "homepage": "https://github.com/cmuell89/speech_ui#readme",
+  "dependencies": {
+    "dotenv": "^7.0.0"
+  },
+  "devDependencies": {
+    "webpack": "^4.29.6"
+  }
+}
