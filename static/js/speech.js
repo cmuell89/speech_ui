@@ -32,7 +32,7 @@ const dictate = () => {
         contentType: "application/json",
         dataType: "json",
         headers: {
-            "Authorization": "Bearer " + 'e18346f4fd9b4c13ac8c3658c83c247b',
+            "Authorization": "Bearer " + '200964e5898443a381bde680610b448d',
         },
         data: JSON.stringify({
           "lang": "en",
