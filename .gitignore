@@ -1,2 +1,6 @@
 env/
+<<<<<<< HEAD
 __pycache__
+=======
+node_modules/
+>>>>>>> wip/native_bootstrap

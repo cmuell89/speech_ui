@@ -1,10 +1,14 @@
 {% extends 'base.html' %}
 {% block title %}Home{% endblock title %}
+{% block head_css_page %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/speech.css') }}">
+    <link href="https://fonts.googleapis.com/css?family=Shadows+Into+Light" rel="stylesheet">
+{% endblock head_css_page %}
 {% block jumbotron %}
     <div class="jumbotron jumbotron-fluid">
         <div class="container">
             <h1 class="display-4">Project 2: Speech UI</h1>
-            <p class="lead">Our UI interacts with both mouse and voice!</p>
+            <p class="lead">Interact with this super-duper smart fridge.</p>
         </div>
     </div>
 {% endblock jumbotron %}
@@ -14,17 +18,27 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
-                        DATA
+                        <img src="{{ url_for('static', filename="fridge.png")}}" class="img-fluid" alt="fridge">
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body">
-                        Data
+                        <div class="speech-input-box" contenteditable="true"></div> 
+                        <i class="fa fa-microphone"></i> 
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="speech-output-box" contenteditable="true"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <audio class="sound" src="{{url_for('static', filename="chime.mp3")}}"></audio>
 {% endblock content %}
+{% block footer_javascript_page %}
+    <script src="{{url_for('static', filename="js/speech.js")}}"></script>
+{% endblock footer_javascript_page %}
