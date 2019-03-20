@@ -1,12 +1,10 @@
 from flask import Flask, render_template
-from flask_bootstrap import Bootstrap
 from webhooks.webhook import initialize, connect_to_database, webhook
 
 app = Flask(__name__)
 app.register_blueprint(webhook)
 
 app.jinja_env.add_extension('jinja2.ext.loopcontrols')
-bootstrap = Bootstrap(app)
 
 
 @app.route('/', methods=['GET', 'POST'])
