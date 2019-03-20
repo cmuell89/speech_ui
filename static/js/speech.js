@@ -22,7 +22,7 @@ const dictate = () => {
     const speechToText = event.results[0][0].transcript;
     
     inputParagraph.textContent = speechToText;
-
+    console.log(event);
     if (event.results[0].isFinal) {
 
       

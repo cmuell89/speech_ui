@@ -1,6 +1,5 @@
 env/
-<<<<<<< HEAD
-__pycache__
-=======
+__pycache__/*
 node_modules/
->>>>>>> wip/native_bootstrap
+webhooks/__pycache__/*
+webhooks/__pycache__/webhook.cpython-35.pyc
