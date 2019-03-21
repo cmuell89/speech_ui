@@ -20,7 +20,7 @@ def connect_to_database():
         return client['speech_db']
     else:
         client = MongoClient(os.environ.get("MONGODB_URI"))
-        return client['speech_db']
+        return client[DATABASE]
 
 
 def initialize(db):
