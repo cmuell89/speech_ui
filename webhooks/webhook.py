@@ -5,11 +5,11 @@ from flask import request, jsonify, Blueprint
 import os
 from pymongo import MongoClient
 
-USE_LOCAL = 'ON_HEROKU' not in os.environ
+USE_LOCAL = True if 'ON_HEROKU' not in os.environ else False
 if USE_LOCAL:
-    DATABASE = DATABASE
+    DATABASE = 'refrigerator'
 else:
-    DATABASE = os.environ.get("DATABSE_NAME")
+    DATABASE = str(os.environ.get("DATABSE_NAME"))
 
 webhook = Blueprint('webhook', __name__)
 
