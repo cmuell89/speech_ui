@@ -6,7 +6,10 @@ import os
 from pymongo import MongoClient
 
 USE_LOCAL = 'ON_HEROKU' not in os.environ
-
+if USE_LOCAL:
+    DATABASE = 'refrigerator'
+else:
+    os.environ.get("DATABSE_NAME")
 
 webhook = Blueprint('webhook', __name__)
 
