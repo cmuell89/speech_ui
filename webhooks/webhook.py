@@ -7,9 +7,9 @@ from pymongo import MongoClient
 
 USE_LOCAL = 'ON_HEROKU' not in os.environ
 if USE_LOCAL:
-    DATABASE = 'refrigerator'
+    DATABASE = DATABASE
 else:
-    os.environ.get("DATABSE_NAME")
+    DATABASE = os.environ.get("DATABSE_NAME")
 
 webhook = Blueprint('webhook', __name__)
 
@@ -30,7 +30,7 @@ def initialize(db):
         "fridgeTemp": 40,
         "shoppingList": shopping_list
     }
-    db['refrigerator'].insert_one(doc)
+    db[DATABASE].insert_one(doc)
 
 
 def valid_freezer_temp(temp):
@@ -48,49 +48,49 @@ def valid_fridge_temp(temp):
 
 
 def set_freezer_temp(db, temp):
-    mongo_id = db['refrigerator'].find_one()['_id']
-    db['refrigerator'].find_one_and_update({"_id": mongo_id},
+    mongo_id = db[DATABASE].find_one()['_id']
+    db[DATABASE].find_one_and_update({"_id": mongo_id},
                                            {"$set": {"freezerTemp": temp}})
 
 
 def get_freezer_temp(db):
-    return db['refrigerator'].find_one()['freezerTemp']
+    return db[DATABASE].find_one()['freezerTemp']
 
 
 def set_fridge_temp(db, temp):
-    mongo_id = db['refrigerator'].find_one()['_id']
-    db['refrigerator'].find_one_and_update({"_id": mongo_id},
+    mongo_id = db[DATABASE].find_one()['_id']
+    db[DATABASE].find_one_and_update({"_id": mongo_id},
                                            {"$set": {"fridgeTemp": temp}})
 
 
 def get_fridge_temp(db):
-    return db['refrigerator'].find_one()['fridgeTemp']
+    return db[DATABASE].find_one()['fridgeTemp']
 
 
 def add_to_shopping_list(db, item):
-    mongo_id = db['refrigerator'].find_one()['_id']
-    shopping_list = db['refrigerator'].find_one()['shoppingList']
+    mongo_id = db[DATABASE].find_one()['_id']
+    shopping_list = db[DATABASE].find_one()['shoppingList']
     shopping_list.append(item)
-    db['refrigerator'].find_one_and_update({"_id": mongo_id},
+    db[DATABASE].find_one_and_update({"_id": mongo_id},
                                            {"$set": {"shoppingList": shopping_list}})
 
 
 def remove_from_shopping_list(db, item):
-    mongo_id = db['refrigerator'].find_one()['_id']
-    shopping_list = db['refrigerator'].find_one()['shoppingList']
+    mongo_id = db[DATABASE].find_one()['_id']
+    shopping_list = db[DATABASE].find_one()['shoppingList']
     if item in shopping_list:
         shopping_list.remove(item)
-    db['refrigerator'].find_one_and_update({"_id": mongo_id},
+    db[DATABASE].find_one_and_update({"_id": mongo_id},
                                            {"$set": {"shoppingList": shopping_list}})
 
 
 def get_shopping_list(db):
-    return db['refrigerator'].find_one()['shoppingList']
+    return db[DATABASE].find_one()['shoppingList']
 
 
 def clear_shopping_list(db):
-    mongo_id = db['refrigerator'].find_one()['_id']
-    db['refrigerator'].find_one_and_update({"_id": mongo_id},
+    mongo_id = db[DATABASE].find_one()['_id']
+    db[DATABASE].find_one_and_update({"_id": mongo_id},
                                            {"$set": {"shoppingList": []}})
 
 
