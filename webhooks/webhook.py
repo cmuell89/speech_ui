@@ -50,7 +50,7 @@ def valid_fridge_temp(temp):
 def set_freezer_temp(db, temp):
     mongo_id = db[DATABASE].find_one()['_id']
     db[DATABASE].find_one_and_update({"_id": mongo_id},
-                                           {"$set": {"freezerTemp": temp}})
+                                     {"$set": {"freezerTemp": temp}})
 
 
 def get_freezer_temp(db):
@@ -60,7 +60,7 @@ def get_freezer_temp(db):
 def set_fridge_temp(db, temp):
     mongo_id = db[DATABASE].find_one()['_id']
     db[DATABASE].find_one_and_update({"_id": mongo_id},
-                                           {"$set": {"fridgeTemp": temp}})
+                                     {"$set": {"fridgeTemp": temp}})
 
 
 def get_fridge_temp(db):
@@ -72,7 +72,7 @@ def add_to_shopping_list(db, item):
     shopping_list = db[DATABASE].find_one()['shoppingList']
     shopping_list.append(item)
     db[DATABASE].find_one_and_update({"_id": mongo_id},
-                                           {"$set": {"shoppingList": shopping_list}})
+                                     {"$set": {"shoppingList": shopping_list}})
 
 
 def remove_from_shopping_list(db, item):
@@ -81,7 +81,7 @@ def remove_from_shopping_list(db, item):
     if item in shopping_list:
         shopping_list.remove(item)
     db[DATABASE].find_one_and_update({"_id": mongo_id},
-                                           {"$set": {"shoppingList": shopping_list}})
+                                     {"$set": {"shoppingList": shopping_list}})
 
 
 def get_shopping_list(db):
@@ -91,7 +91,7 @@ def get_shopping_list(db):
 def clear_shopping_list(db):
     mongo_id = db[DATABASE].find_one()['_id']
     db[DATABASE].find_one_and_update({"_id": mongo_id},
-                                           {"$set": {"shoppingList": []}})
+                                     {"$set": {"shoppingList": []}})
 
 
 @webhook.route("/webhook/<component>/")
