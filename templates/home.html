@@ -23,7 +23,7 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card">
+                <!-- <div class="card">
                     <div class="card-body">
                         <div class="speech-input-box" contenteditable="true"></div> 
                         <i class="fa fa-microphone"></i> 
@@ -33,6 +33,14 @@
                     <div class="card-body">
                         <div class="speech-output-box" contenteditable="true"></div>
                     </div>
+                </div> -->
+                <div class="card">
+                    <iframe
+                        allow="microphone;"
+                        width="350"
+                        height="430"
+                        src="https://console.dialogflow.com/api-client/demo/embedded/24554641-0f6e-41d1-ad34-55d0978b918e">
+                    </iframe>
                 </div>
             </div>
         </div>
@@ -40,5 +48,5 @@
     <audio class="sound" src="{{url_for('static', filename="chime.mp3")}}"></audio>
 {% endblock content %}
 {% block footer_javascript_page %}
-    <script src="{{url_for('static', filename="js/speech.js")}}"></script>
-{% endblock footer_javascript_page %}
+<!--     <script src="{{url_for('static', filename="js/speech.js")}}"></script>
+ -->{% endblock footer_javascript_page %}

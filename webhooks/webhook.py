@@ -152,14 +152,14 @@ def web_shopping_list_remove(item):
 def get_help():
 
     helpString = ("Here's what I can do:"
-                  "\tWhat is the temperature of the freezer?"
-                  "\tSet the freezer temp to XX degrees"
-                  "\tWhat is the temperature of the fridge?"
-                  "\tSet the fridge temp to XX degrees"
-                  "\tAdd 'milk' to my shopping list."
-                  "\tRemove 'milk' from my shopping list."
-                  "\tWhat do I need to buy at the store?"
-                  "\tClear my shopping list."
+                  "\n\tWhat is the temperature of the freezer?"
+                  "\n\tSet the freezer temp to XX degrees"
+                  "\n\tWhat is the temperature of the fridge?"
+                  "\n\tSet the fridge temp to XX degrees"
+                  "\n\tAdd 'milk' to my shopping list."
+                  "\n\tRemove 'milk' from my shopping list."
+                  "\n\tWhat do I need to buy at the store?"
+                  "\n\tClear my shopping list."
                   )
     return helpString
 

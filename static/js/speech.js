@@ -28,15 +28,15 @@ const dictate = () => {
       
       $.ajax({
         type: "POST",
-        url: "POST https://dialogflow.googleapis.com/v2/{session=projects/*/agent/sessions/*}:detectIntent",
+        url: "https://dialogflow.googleapis.com/v2/projects/speech-agent-f8831/agent/sessions/123456789:detectIntent",
         contentType: "application/json",
         dataType: "json",
         headers: {
-            "Authorization": "Bearer " + 'e18346f4fd9b4c13ac8c3658c83c247b',
+            "Authorization": "Bearer " + 'ya29.c.ElrTBhF9LCGx1ztArr4mK2pG04ONUYo4-RtFzk89mFfWSeNIyFX1prakb3DSQyVRNmTRDEe0Bpap9yaiSxah0aXCHVB6zYQv-0m6ajNam4lxkRINfCcafuARJI4',
         },
         data: JSON.stringify({
           "languageCode": "en-US",
-          "test": speechToText,
+          "queryInput": speechToText,
           "timezone": "America/Denver"
         }),
         success: function(response) {
