@@ -9,8 +9,9 @@ USE_LOCAL = True if 'ON_HEROKU' not in os.environ else False
 if USE_LOCAL:
     DATABASE = 'refrigerator'
 else:
-    DATABASE = str(os.environ.get("DATABSE_NAME"))
+    DATABASE = os.environ.get("DATABASE_NAME")
 
+print(DATABASE)
 webhook = Blueprint('webhook', __name__)
 
 
