@@ -2,7 +2,7 @@ from flask import Flask, render_template
 from webhooks.webhook import initialize, connect_to_database, webhook
 
 
-b = connect_to_database()
+db = connect_to_database()
 initialize(db)
 
 app = Flask(__name__)
