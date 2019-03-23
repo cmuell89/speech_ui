@@ -20,6 +20,7 @@ def connect_to_database():
         return client['speech_db']
     else:
         client = MongoClient(os.environ.get("MONGODB_URI"))
+        print(client[DATABASE])
         return client[DATABASE]
 
 
