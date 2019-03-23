@@ -1,9 +1,12 @@
 from flask import Flask, render_template
 from webhooks.webhook import initialize, connect_to_database, webhook
 
+
+b = connect_to_database()
+initialize(db)
+
 app = Flask(__name__)
 app.register_blueprint(webhook)
-
 app.jinja_env.add_extension('jinja2.ext.loopcontrols')
 
 
